@@ -1,0 +1,109 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="About Me">
+  <main>
+    <div class="container">
+      <h1>About Me</h1>
+      <div class="content">
+        <p class="lead">
+          I'm a developer passionate about building modern web applications 
+          and learning cloud technologies.
+        </p>
+        <p>
+          Currently exploring AWS services and infrastructure as code with OpenTofu. 
+          This site is my first cloud project, where I'm learning about serverless 
+          architecture, CI/CD pipelines, and modern web development.
+        </p>
+        <h2>What I'm Learning</h2>
+        <ul>
+          <li>AWS Cloud Services (Lambda, API Gateway, DynamoDB, CloudFront)</li>
+          <li>Infrastructure as Code with OpenTofu</li>
+          <li>Modern web frameworks (Astro, React)</li>
+          <li>Serverless architecture patterns</li>
+          <li>CI/CD with GitHub Actions</li>
+        </ul>
+        <h2>My Journey</h2>
+        <p>
+          I believe in learning by building. This portfolio site is a perfect example - 
+          it's not just a showcase, it's a hands-on learning project that covers 
+          everything from frontend development to cloud infrastructure.
+        </p>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    padding: 4rem 1rem;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #111827;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+  
+  .content {
+    line-height: 1.7;
+  }
+  
+  .lead {
+    font-size: 1.25rem;
+    color: #374151;
+    margin-bottom: 1.5rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1rem;
+  }
+  
+  ul {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    color: #374151;
+  }
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    h1 {
+      color: #f9fafb;
+    }
+    
+    h2 {
+      color: #e5e7eb;
+    }
+    
+    .lead {
+      color: #d1d5db;
+    }
+    
+    p {
+      color: #9ca3af;
+    }
+    
+    ul {
+      color: #d1d5db;
+    }
+  }
+</style>

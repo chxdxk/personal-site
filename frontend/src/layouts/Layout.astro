@@ -1,0 +1,55 @@
+---
+import Navigation from '../components/Navigation.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Personal portfolio and blog showcasing my development projects and skills" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <Navigation />
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --accent: 136, 58, 234;
+    --accent-light: 224, 204, 250;
+    --accent-dark: 49, 10, 101;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    font-family: system-ui, sans-serif;
+    background: #f9fafb;
+  }
+  
+  body {
+    margin: 0;
+    min-height: 100vh;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    html {
+      background: #0d1117;
+      color: #c9d1d9;
+    }
+  }
+</style>

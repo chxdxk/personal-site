@@ -1,0 +1,96 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="My Portfolio - Home">
+  <main>
+    <div class="container">
+      <h1>Welcome to My Portfolio</h1>
+      <p class="intro">
+        Hi, I'm a developer learning AWS and building cool things.
+      </p>
+      <p class="description">
+        This site showcases my skills, projects, and thoughts on software development 
+        and cloud infrastructure. Built with Astro and deployed on AWS using serverless architecture.
+      </p>
+      <div class="cta">
+        <a href="/about" class="button">Learn More About Me</a>
+        <a href="/blog" class="button button-secondary">Read My Blog</a>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    padding: 4rem 1rem;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #111827;
+  }
+  
+  .intro {
+    font-size: 1.5rem;
+    color: #374151;
+    margin-bottom: 1rem;
+  }
+  
+  .description {
+    font-size: 1.125rem;
+    color: #6b7280;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+  
+  .cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  
+  .button:hover {
+    background: #1d4ed8;
+  }
+  
+  .button-secondary {
+    background: #6b7280;
+  }
+  
+  .button-secondary:hover {
+    background: #4b5563;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    h1 {
+      color: #f9fafb;
+    }
+    
+    .intro {
+      color: #d1d5db;
+    }
+    
+    .description {
+      color: #9ca3af;
+    }
+  }
+</style>

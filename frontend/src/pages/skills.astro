@@ -1,0 +1,121 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const skillCategories = [
+  {
+    category: "Frontend",
+    skills: ["JavaScript", "TypeScript", "React", "Astro", "Tailwind CSS", "HTML/CSS"]
+  },
+  {
+    category: "Cloud & Infrastructure",
+    skills: ["AWS (S3, CloudFront, Lambda, API Gateway, DynamoDB)", "OpenTofu/Terraform", "CI/CD", "Serverless Architecture"]
+  },
+  {
+    category: "Backend",
+    skills: ["Node.js", "API Development", "DynamoDB", "RESTful Services"]
+  },
+  {
+    category: "Tools & Practices",
+    skills: ["Git/GitHub", "GitHub Actions", "VS Code", "Testing", "Markdown"]
+  }
+];
+---
+
+<Layout title="My Skills">
+  <main>
+    <div class="container">
+      <h1>My Skills</h1>
+      <div class="grid">
+        {skillCategories.map(({ category, skills }) => (
+          <div class="skill-card">
+            <h2>{category}</h2>
+            <ul>
+              {skills.map(skill => (
+                <li>
+                  <span class="bullet">▹</span>
+                  {skill}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    padding: 4rem 1rem;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #111827;
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .skill-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  li {
+    display: flex;
+    align-items: center;
+    color: #374151;
+    margin-bottom: 0.5rem;
+  }
+  
+  .bullet {
+    color: #2563eb;
+    margin-right: 0.5rem;
+    font-weight: bold;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    h1 {
+      color: #f9fafb;
+    }
+    
+    .skill-card {
+      background: #161b22;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    h2 {
+      color: #e5e7eb;
+    }
+    
+    li {
+      color: #d1d5db;
+    }
+  }
+</style>

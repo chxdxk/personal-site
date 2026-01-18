@@ -1,0 +1,149 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Resume">
+  <main>
+    <div class="container">
+      <h1>Resume</h1>
+      
+      <section>
+        <h2>Experience</h2>
+        <div class="card">
+          <h3>Your Job Title</h3>
+          <p class="meta">Company Name | Date Range</p>
+          <ul>
+            <li>Key accomplishment or responsibility</li>
+            <li>Another key accomplishment</li>
+            <li>Technologies used and impact made</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>Education</h2>
+        <div class="card">
+          <h3>Degree Name</h3>
+          <p class="meta">University Name | Graduation Year</p>
+          <p>Relevant coursework, achievements, or specializations</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Projects</h2>
+        <div class="card">
+          <h3>Personal Portfolio Site</h3>
+          <p class="meta">Tech Stack: Astro, AWS, OpenTofu</p>
+          <p>
+            Built a serverless personal website using AWS services including S3, 
+            CloudFront, Lambda, and DynamoDB. Implemented infrastructure as code 
+            with OpenTofu and automated deployments with GitHub Actions.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Certifications</h2>
+        <div class="card">
+          <p>Add your certifications here (e.g., AWS Certified Developer, etc.)</p>
+        </div>
+      </section>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    padding: 4rem 1rem;
+  }
+  
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #111827;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+  
+  .card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+  
+  .meta {
+    color: #6b7280;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  p {
+    color: #374151;
+    line-height: 1.6;
+  }
+  
+  ul {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    color: #374151;
+  }
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    h1 {
+      color: #f9fafb;
+    }
+    
+    h2 {
+      color: #e5e7eb;
+    }
+    
+    .card {
+      background: #161b22;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    h3 {
+      color: #f9fafb;
+    }
+    
+    .meta {
+      color: #9ca3af;
+    }
+    
+    p {
+      color: #d1d5db;
+    }
+    
+    ul {
+      color: #d1d5db;
+    }
+  }
+</style>
