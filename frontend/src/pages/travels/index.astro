@@ -356,6 +356,7 @@ function formatDateRange(startDate: Date, endDate?: Date) {
 
   .list-item {
     position: relative;
+    padding-bottom: 2rem;
   }
 
   .list-content {
@@ -637,16 +638,16 @@ function formatDateRange(startDate: Date, endDate?: Date) {
   @media (max-width: 968px) {
     .list-content {
       grid-template-columns: 1fr !important;
-      gap: 2rem;
-    }
-
-    .list-content.left .text-column,
-    .list-content.right .text-column {
-      order: 1 !important;
+      gap: 0.5rem;
     }
 
     .list-content.left .carousel-column,
     .list-content.right .carousel-column {
+      order: 1 !important;
+    }
+
+    .list-content.left .text-column,
+    .list-content.right .text-column {
       order: 2 !important;
     }
 
@@ -662,6 +663,7 @@ function formatDateRange(startDate: Date, endDate?: Date) {
   @media (max-width: 768px) {
     .grid-view {
       grid-template-columns: 1fr;
+      gap: 0.5rem
     }
 
     h1 {
