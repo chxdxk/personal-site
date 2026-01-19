@@ -37,6 +37,31 @@ resource "aws_cloudfront_origin_access_control" "website" {
   signing_protocol                  = "sigv4"
 }
 
+# CloudFront Function to append index.html to directory paths
+resource "aws_cloudfront_function" "url_rewrite" {
+  name    = "${var.project_name}-url-rewrite"
+  runtime = "cloudfront-js-2.0"
+  comment = "Append index.html to directory paths"
+  publish = true
+  code    = <<-EOT
+function handler(event) {
+    var request = event.request;
+    var uri = request.uri;
+
+    // Check if URI is missing a file extension and doesn't end with /
+    if (!uri.includes('.') && !uri.endsWith('/')) {
+        request.uri = uri + '/index.html';
+    }
+    // Check if URI ends with /
+    else if (uri.endsWith('/')) {
+        request.uri = uri + 'index.html';
+    }
+
+    return request;
+}
+EOT
+}
+
 # CloudFront Distribution
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
@@ -68,6 +93,11 @@ resource "aws_cloudfront_distribution" "website" {
     default_ttl            = 3600   # 1 hour
     max_ttl                = 86400  # 24 hours
     compress               = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.url_rewrite.arn
+    }
   }
 
   # Custom error response for SPA routing

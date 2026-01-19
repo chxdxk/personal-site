@@ -62,14 +62,23 @@ module "frontend" {
 # DNS Module (Route53)
 module "dns" {
   source = "../../modules/dns"
-  
+
   domain_name            = var.domain_name
   cloudfront_domain_name = module.frontend.cloudfront_domain_name
   acm_certificate_arn    = module.frontend.acm_certificate_arn
   acm_validation_options = module.frontend.acm_certificate_validation_records
   tags                   = var.tags
-  
+
   providers = {
     aws.us-east-1 = aws.us-east-1
   }
+}
+
+# Backend Module (Lambda, API Gateway, DynamoDB)
+module "backend" {
+  source = "../../modules/backend"
+
+  project_name = var.project_name
+  domain_name  = var.domain_name
+  tags         = var.tags
 }

@@ -1,0 +1,10 @@
+{
+  "name": "blog-comments",
+  "version": "1.0.0",
+  "description": "Lambda functions for blog commenting system",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.470.0",
+    "@aws-sdk/lib-dynamodb": "^3.470.0"
+  }
+}

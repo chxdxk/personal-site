@@ -27,3 +27,13 @@ output "route53_zone_id" {
   description = "Route53 hosted zone ID"
   value       = module.dns.zone_id
 }
+
+output "api_endpoint" {
+  description = "API Gateway endpoint for comments"
+  value       = module.backend.api_endpoint
+}
+
+output "comments_table_name" {
+  description = "DynamoDB table name for comments"
+  value       = module.backend.dynamodb_table_name
+}
