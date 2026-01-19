@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import CommentList from '../../components/CommentList.astro';
+import CommentForm from '../../components/CommentForm.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -12,6 +14,9 @@ export async function getStaticPaths() {
 
 const post = Astro.props;
 const { Content } = await post.render();
+
+// API endpoint from environment variables
+const apiEndpoint = import.meta.env.PUBLIC_API_ENDPOINT || '';
 ---
 
 <Layout title={post.data.title} description={post.data.description}>
@@ -41,7 +46,13 @@ const { Content } = await post.render();
       <div class="content">
         <Content />
       </div>
-      
+
+      <!-- Comments Section -->
+      <section class="comments-section">
+        <CommentList apiEndpoint={apiEndpoint} postSlug={post.slug} />
+        <CommentForm apiEndpoint={apiEndpoint} postSlug={post.slug} />
+      </section>
+
       <footer>
         <a href="/blog" class="back-link">← Back to all posts</a>
       </footer>
@@ -161,7 +172,13 @@ const { Content } = await post.render();
     color: #4b5563;
     font-style: italic;
   }
-  
+
+  .comments-section {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 2px solid #e5e7eb;
+  }
+
   footer {
     margin-top: 3rem;
     padding-top: 2rem;
@@ -213,7 +230,11 @@ const { Content } = await post.render();
     .content :global(blockquote) {
       color: #9ca3af;
     }
-    
+
+    .comments-section {
+      border-top-color: #30363d;
+    }
+
     footer {
       border-top-color: #30363d;
     }

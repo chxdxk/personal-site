@@ -1,0 +1,234 @@
+---
+interface Props {
+  apiEndpoint: string;
+  postSlug: string;
+}
+
+const { apiEndpoint, postSlug } = Astro.props;
+---
+
+<div class="comment-form-container">
+  <h3>Leave a Comment</h3>
+  <form id="comment-form" data-api-endpoint={apiEndpoint} data-post-slug={postSlug}>
+    <div class="form-group">
+      <label for="author">Name *</label>
+      <input
+        type="text"
+        id="author"
+        name="author"
+        required
+        minlength="2"
+        maxlength="50"
+        placeholder="Your name"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email *</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        required
+        placeholder="your@email.com"
+      />
+      <small>Your email won't be published</small>
+    </div>
+
+    <div class="form-group">
+      <label for="comment">Comment *</label>
+      <textarea
+        id="comment"
+        name="comment"
+        required
+        minlength="10"
+        maxlength="1000"
+        rows="5"
+        placeholder="Share your thoughts..."
+      ></textarea>
+      <small id="char-count">0 / 1000 characters</small>
+    </div>
+
+    <button type="submit" id="submit-btn">Submit Comment</button>
+    <div id="form-message" class="form-message"></div>
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById('comment-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const formMessage = document.getElementById('form-message') as HTMLDivElement;
+  const commentTextarea = document.getElementById('comment') as HTMLTextAreaElement;
+  const charCount = document.getElementById('char-count') as HTMLElement;
+
+  // Character counter
+  commentTextarea.addEventListener('input', () => {
+    const length = commentTextarea.value.length;
+    charCount.textContent = `${length} / 1000 characters`;
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const apiEndpoint = form.dataset.apiEndpoint;
+    const postSlug = form.dataset.postSlug;
+
+    const formData = new FormData(form);
+    const data = {
+      postSlug,
+      author: formData.get('author'),
+      email: formData.get('email'),
+      comment: formData.get('comment')
+    };
+
+    // Disable submit button
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+    formMessage.textContent = '';
+    formMessage.className = 'form-message';
+
+    try {
+      const response = await fetch(`${apiEndpoint}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        formMessage.textContent = 'Comment submitted! It will appear after moderation.';
+        formMessage.className = 'form-message success';
+        form.reset();
+        charCount.textContent = '0 / 1000 characters';
+      } else {
+        formMessage.textContent = result.error || 'Failed to submit comment';
+        formMessage.className = 'form-message error';
+      }
+    } catch (error) {
+      formMessage.textContent = 'Network error. Please try again.';
+      formMessage.className = 'form-message error';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Comment';
+    }
+  });
+</script>
+
+<style>
+  .comment-form-container {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #111827;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+
+  input:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    ring: 2px;
+    ring-color: #2563eb;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.25rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+
+  button[type="submit"] {
+    background: #2563eb;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button[type="submit"]:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+
+  button[type="submit"]:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  .form-message {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+  }
+
+  .form-message.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #10b981;
+  }
+
+  .form-message.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #ef4444;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .comment-form-container {
+      background: #1f2937;
+    }
+
+    h3 {
+      color: #f9fafb;
+    }
+
+    label {
+      color: #e5e7eb;
+    }
+
+    input,
+    textarea {
+      background: #374151;
+      border-color: #4b5563;
+      color: #f9fafb;
+    }
+
+    small {
+      color: #9ca3af;
+    }
+  }
+</style>

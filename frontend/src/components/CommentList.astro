@@ -1,0 +1,165 @@
+---
+interface Props {
+  apiEndpoint: string;
+  postSlug: string;
+}
+
+const { apiEndpoint, postSlug } = Astro.props;
+---
+
+<div class="comments-container">
+  <h3>Comments</h3>
+  <div id="comments-list" data-api-endpoint={apiEndpoint} data-post-slug={postSlug}>
+    <p class="loading">Loading comments...</p>
+  </div>
+</div>
+
+<script>
+  const commentsList = document.getElementById('comments-list') as HTMLDivElement;
+  const apiEndpoint = commentsList.dataset.apiEndpoint;
+  const postSlug = commentsList.dataset.postSlug;
+
+  async function fetchComments() {
+    try {
+      const response = await fetch(`${apiEndpoint}/comments/${postSlug}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch comments');
+      }
+
+      const data = await response.json();
+      displayComments(data.comments || []);
+    } catch (error) {
+      commentsList.innerHTML = '<p class="error">Failed to load comments. Please try again later.</p>';
+    }
+  }
+
+  function displayComments(comments: any[]) {
+    if (comments.length === 0) {
+      commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first to comment!</p>';
+      return;
+    }
+
+    commentsList.innerHTML = comments.map(comment => `
+      <div class="comment">
+        <div class="comment-header">
+          <span class="comment-author">${escapeHtml(comment.author)}</span>
+          <span class="comment-date">${formatDate(comment.timestamp)}</span>
+        </div>
+        <div class="comment-body">
+          ${escapeHtml(comment.comment)}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function formatDate(timestamp: string): string {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  // Fetch comments on page load
+  fetchComments();
+</script>
+
+<style>
+  .comments-container {
+    margin-top: 3rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #111827;
+  }
+
+  .loading,
+  .error,
+  .no-comments {
+    padding: 1.5rem;
+    text-align: center;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+  }
+
+  .error {
+    color: #991b1b;
+    background: #fee2e2;
+  }
+
+  .comment {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+    border-left: 4px solid #2563eb;
+  }
+
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .comment-author {
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .comment-date {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+
+  .comment-body {
+    color: #374151;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    h3 {
+      color: #f9fafb;
+    }
+
+    .loading,
+    .no-comments {
+      background: #1f2937;
+      color: #9ca3af;
+    }
+
+    .comment {
+      background: #1f2937;
+      border-left-color: #60a5fa;
+    }
+
+    .comment-author {
+      color: #f9fafb;
+    }
+
+    .comment-date {
+      color: #9ca3af;
+    }
+
+    .comment-body {
+      color: #d1d5db;
+    }
+  }
+</style>
