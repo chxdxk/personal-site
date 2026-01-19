@@ -1,0 +1,263 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+const allTravels = await getCollection('travels');
+const sortedTravels = allTravels.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// Helper function to format date range
+function formatDateRange(startDate: Date, endDate?: Date) {
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' };
+
+  if (!endDate) {
+    // Single date - show full date
+    return startDate.toLocaleDateString('en-us', { ...options, day: 'numeric' });
+  }
+
+  // Date range
+  const startMonth = startDate.toLocaleDateString('en-us', { month: 'long' });
+  const endMonth = endDate.toLocaleDateString('en-us', { month: 'long' });
+  const startYear = startDate.getFullYear();
+  const endYear = endDate.getFullYear();
+
+  if (startYear === endYear) {
+    if (startMonth === endMonth) {
+      // Same month and year
+      return `${startMonth} ${startYear}`;
+    }
+    // Different months, same year
+    return `${startMonth} - ${endMonth} ${startYear}`;
+  }
+
+  // Different years
+  return `${startMonth} ${startYear} - ${endMonth} ${endYear}`;
+}
+---
+
+<Layout title="Travels" description="Adventures and journeys around the world">
+  <main>
+    <div class="container">
+      <h1>Travels</h1>
+      <p class="subtitle">Adventures and memories from around the world</p>
+
+      <div class="travels-grid">
+        {sortedTravels.map((travel) => (
+          <article class="travel-card">
+            <a href={`/travels/${travel.slug}`}>
+              <div class="image-container">
+                <img src={travel.data.featuredImage} alt={travel.data.title} />
+                <div class="image-overlay">
+                  <span class="view-photos">View Photos</span>
+                </div>
+              </div>
+              <div class="content">
+                <h2>{travel.data.title}</h2>
+                <p class="location">{travel.data.location}, {travel.data.country}</p>
+                <p class="date">
+                  {formatDateRange(travel.data.date, travel.data.endDate)}
+                </p>
+                <p class="description">{travel.data.description}</p>
+                {travel.data.tags.length > 0 && (
+                  <div class="tags">
+                    {travel.data.tags.map(tag => (
+                      <span class="tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+
+      {sortedTravels.length === 0 && (
+        <p class="empty-state">No travels yet. Check back soon!</p>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    padding: 4rem 1rem;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #111827;
+  }
+
+  .subtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+  }
+
+  .travels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+  }
+
+  .travel-card {
+    background: white;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .travel-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .travel-card a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .image-container {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+  }
+
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+  }
+
+  .travel-card:hover .image-container img {
+    transform: scale(1.05);
+  }
+
+  .image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    padding: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .travel-card:hover .image-overlay {
+    opacity: 1;
+  }
+
+  .view-photos {
+    color: white;
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .location {
+    color: #2563eb;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .date {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .description {
+    color: #374151;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: #6b7280;
+    font-size: 1.125rem;
+    padding: 4rem 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .travels-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    h1 {
+      color: #f9fafb;
+    }
+
+    .subtitle {
+      color: #9ca3af;
+    }
+
+    .travel-card {
+      background: #161b22;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    h2 {
+      color: #f9fafb;
+    }
+
+    .location {
+      color: #60a5fa;
+    }
+
+    .date {
+      color: #9ca3af;
+    }
+
+    .description {
+      color: #d1d5db;
+    }
+
+    .tag {
+      background: #713f12;
+      color: #fde68a;
+    }
+
+    .empty-state {
+      color: #9ca3af;
+    }
+  }
+</style>

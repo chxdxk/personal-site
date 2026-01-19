@@ -1,0 +1,434 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const travels = await getCollection('travels');
+  return travels.map((travel) => ({
+    params: { slug: travel.slug },
+    props: travel,
+  }));
+}
+
+const travel = Astro.props;
+const { Content } = await travel.render();
+
+// Helper function to format date range
+function formatDateRange(startDate: Date, endDate?: Date) {
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' };
+
+  if (!endDate) {
+    return startDate.toLocaleDateString('en-us', { ...options, day: 'numeric' });
+  }
+
+  const startMonth = startDate.toLocaleDateString('en-us', { month: 'long' });
+  const endMonth = endDate.toLocaleDateString('en-us', { month: 'long' });
+  const startYear = startDate.getFullYear();
+  const endYear = endDate.getFullYear();
+
+  if (startYear === endYear) {
+    if (startMonth === endMonth) {
+      return `${startMonth} ${startYear}`;
+    }
+    return `${startMonth} - ${endMonth} ${startYear}`;
+  }
+
+  return `${startMonth} ${startYear} - ${endMonth} ${endYear}`;
+}
+---
+
+<Layout title={travel.data.title} description={travel.data.description}>
+  <main>
+    <article class="container">
+      <header>
+        <h1>{travel.data.title}</h1>
+        <div class="meta">
+          <span class="location">{travel.data.location}, {travel.data.country}</span>
+          <span class="date">{formatDateRange(travel.data.date, travel.data.endDate)}</span>
+        </div>
+        {travel.data.tags.length > 0 && (
+          <div class="tags">
+            {travel.data.tags.map(tag => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <!-- Featured Image -->
+      <div class="featured-image">
+        <img src={travel.data.featuredImage} alt={travel.data.title} />
+      </div>
+
+      <!-- Story Content -->
+      <div class="content">
+        <Content />
+      </div>
+
+      <!-- Photo Gallery -->
+      {travel.data.images.length > 0 && (
+        <section class="gallery-section">
+          <h2>Photos</h2>
+          <div class="gallery" id="gallery">
+            {travel.data.images.map((image, index) => (
+              <div class="gallery-item" data-index={index}>
+                <img src={image} alt={`Photo ${index + 1}`} loading="lazy" />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <footer>
+        <a href="/travels" class="back-link">← Back to all travels</a>
+      </footer>
+    </article>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+      <button class="lightbox-close" id="lightbox-close">&times;</button>
+      <button class="lightbox-prev" id="lightbox-prev">&#8249;</button>
+      <button class="lightbox-next" id="lightbox-next">&#8250;</button>
+      <img id="lightbox-image" src="" alt="" />
+      <div class="lightbox-counter" id="lightbox-counter"></div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  const gallery = document.getElementById('gallery');
+  const lightbox = document.getElementById('lightbox') as HTMLDivElement;
+  const lightboxImage = document.getElementById('lightbox-image') as HTMLImageElement;
+  const lightboxClose = document.getElementById('lightbox-close');
+  const lightboxPrev = document.getElementById('lightbox-prev');
+  const lightboxNext = document.getElementById('lightbox-next');
+  const lightboxCounter = document.getElementById('lightbox-counter');
+
+  if (gallery) {
+    const images = gallery.querySelectorAll('.gallery-item img');
+    let currentIndex = 0;
+
+    function openLightbox(index: number) {
+      currentIndex = index;
+      const img = images[currentIndex] as HTMLImageElement;
+      lightboxImage.src = img.src;
+      lightboxImage.alt = img.alt;
+      lightboxCounter!.textContent = `${currentIndex + 1} / ${images.length}`;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function showPrev() {
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      openLightbox(currentIndex);
+    }
+
+    function showNext() {
+      currentIndex = (currentIndex + 1) % images.length;
+      openLightbox(currentIndex);
+    }
+
+    // Click on gallery images
+    images.forEach((img, index) => {
+      img.addEventListener('click', () => openLightbox(index));
+    });
+
+    // Lightbox controls
+    lightboxClose?.addEventListener('click', closeLightbox);
+    lightboxPrev?.addEventListener('click', showPrev);
+    lightboxNext?.addEventListener('click', showNext);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('active')) return;
+
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') showPrev();
+      if (e.key === 'ArrowRight') showNext();
+    });
+  }
+</script>
+
+<style>
+  main {
+    padding: 4rem 1rem;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #111827;
+    line-height: 1.2;
+  }
+
+  .meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .location {
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  .date {
+    color: #6b7280;
+    font-size: 0.95rem;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .featured-image {
+    margin-bottom: 2.5rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .featured-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .content {
+    line-height: 1.8;
+    color: #374151;
+    margin-bottom: 3rem;
+  }
+
+  .content :global(h2) {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+
+  .content :global(h3) {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+  }
+
+  .content :global(p) {
+    margin-bottom: 1.25rem;
+  }
+
+  .content :global(ul),
+  .content :global(ol) {
+    margin-bottom: 1.25rem;
+    margin-left: 1.5rem;
+  }
+
+  .content :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .gallery-section {
+    margin-top: 4rem;
+    margin-bottom: 3rem;
+  }
+
+  .gallery-section h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #111827;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .gallery-item {
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    aspect-ratio: 4 / 3;
+    background: #f3f4f6;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Lightbox */
+  .lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox.active {
+    display: flex;
+  }
+
+  .lightbox img {
+    max-width: 90%;
+    max-height: 90vh;
+    object-fit: contain;
+  }
+
+  .lightbox-close,
+  .lightbox-prev,
+  .lightbox-next {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    font-size: 2.5rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    transition: background 0.2s;
+    z-index: 1001;
+  }
+
+  .lightbox-close:hover,
+  .lightbox-prev:hover,
+  .lightbox-next:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .lightbox-close {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .lightbox-prev {
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lightbox-next {
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lightbox-counter {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .back-link {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    header {
+      border-bottom-color: #30363d;
+    }
+
+    h1 {
+      color: #f9fafb;
+    }
+
+    .location {
+      color: #60a5fa;
+    }
+
+    .date {
+      color: #9ca3af;
+    }
+
+    .tag {
+      background: #713f12;
+      color: #fde68a;
+    }
+
+    .content {
+      color: #d1d5db;
+    }
+
+    .content :global(h2),
+    .content :global(h3) {
+      color: #e5e7eb;
+    }
+
+    .gallery-section h2 {
+      color: #f9fafb;
+    }
+
+    .gallery-item {
+      background: #1f2937;
+    }
+
+    footer {
+      border-top-color: #30363d;
+    }
+  }
+</style>
