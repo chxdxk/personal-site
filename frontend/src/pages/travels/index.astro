@@ -10,11 +10,9 @@ function formatDateRange(startDate: Date, endDate?: Date) {
   const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' };
 
   if (!endDate) {
-    // Single date - show full date
     return startDate.toLocaleDateString('en-us', { ...options, day: 'numeric' });
   }
 
-  // Date range
   const startMonth = startDate.toLocaleDateString('en-us', { month: 'long' });
   const endMonth = endDate.toLocaleDateString('en-us', { month: 'long' });
   const startYear = startDate.getFullYear();
@@ -22,25 +20,99 @@ function formatDateRange(startDate: Date, endDate?: Date) {
 
   if (startYear === endYear) {
     if (startMonth === endMonth) {
-      // Same month and year
       return `${startMonth} ${startYear}`;
     }
-    // Different months, same year
     return `${startMonth} - ${endMonth} ${startYear}`;
   }
 
-  // Different years
   return `${startMonth} ${startYear} - ${endMonth} ${endYear}`;
 }
 ---
 
 <Layout title="Travels" description="Adventures and journeys around the world">
+  <!-- Background image container -->
+  <div id="bg-image" class="background-image"></div>
+
   <main>
     <div class="container">
-      <h1>Travels</h1>
-      <p class="subtitle">Adventures and memories from around the world</p>
+      <div class="header">
+        <div>
+          <h1>Travels</h1>
+          <p class="subtitle">Adventures and memories from around the world</p>
+        </div>
 
-      <div class="travels-grid">
+        <!-- View toggle -->
+        <div class="view-toggle">
+          <button id="list-view-btn" class="toggle-btn active" aria-label="List view">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M3 4h14M3 10h14M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button id="grid-view-btn" class="toggle-btn" aria-label="Grid view">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <rect x="3" y="3" width="6" height="6" rx="1"/>
+              <rect x="11" y="3" width="6" height="6" rx="1"/>
+              <rect x="3" y="11" width="6" height="6" rx="1"/>
+              <rect x="11" y="11" width="6" height="6" rx="1"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- List View -->
+      <div id="list-view" class="list-view">
+        {sortedTravels.map((travel, index) => (
+          <article class="list-item" data-index={index}>
+            <div class="list-content" class:list={index % 2 === 0 ? 'left' : 'right'}>
+              <div class="text-column">
+                <h2>{travel.data.title}</h2>
+                <p class="location">{travel.data.location}, {travel.data.country}</p>
+                <p class="date">{formatDateRange(travel.data.date, travel.data.endDate)}</p>
+                <p class="description">{travel.data.description}</p>
+                {travel.data.tags.length > 0 && (
+                  <div class="tags">
+                    {travel.data.tags.map(tag => (
+                      <span class="tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+                <a href={`/travels/${travel.slug}`} class="read-more">View Full Story →</a>
+              </div>
+
+              <div class="carousel-column">
+                <div class="carousel" data-carousel={index}>
+                  <button class="carousel-btn prev" data-carousel={index} data-dir="prev" aria-label="Previous image">‹</button>
+                  <div class="carousel-track">
+                    {travel.data.images.map((image, imgIndex) => (
+                      <img
+                        src={image}
+                        alt={`${travel.data.title} - Photo ${imgIndex + 1}`}
+                        class={imgIndex === 0 ? 'active' : ''}
+                        data-carousel={index}
+                        data-img-index={imgIndex}
+                      />
+                    ))}
+                  </div>
+                  <button class="carousel-btn next" data-carousel={index} data-dir="next" aria-label="Next image">›</button>
+                  <div class="carousel-dots">
+                    {travel.data.images.map((_, imgIndex) => (
+                      <button
+                        class={`dot ${imgIndex === 0 ? 'active' : ''}`}
+                        data-carousel={index}
+                        data-dot-index={imgIndex}
+                        aria-label={`Go to image ${imgIndex + 1}`}
+                      ></button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <!-- Grid View -->
+      <div id="grid-view" class="grid-view" style="display: none;">
         {sortedTravels.map((travel) => (
           <article class="travel-card">
             <a href={`/travels/${travel.slug}`}>
@@ -53,9 +125,7 @@ function formatDateRange(startDate: Date, endDate?: Date) {
               <div class="content">
                 <h2>{travel.data.title}</h2>
                 <p class="location">{travel.data.location}, {travel.data.country}</p>
-                <p class="date">
-                  {formatDateRange(travel.data.date, travel.data.endDate)}
-                </p>
+                <p class="date">{formatDateRange(travel.data.date, travel.data.endDate)}</p>
                 <p class="description">{travel.data.description}</p>
                 {travel.data.tags.length > 0 && (
                   <div class="tags">
@@ -77,14 +147,163 @@ function formatDateRange(startDate: Date, endDate?: Date) {
   </main>
 </Layout>
 
+<script>
+  // View toggle functionality
+  const listViewBtn = document.getElementById('list-view-btn');
+  const gridViewBtn = document.getElementById('grid-view-btn');
+  const listView = document.getElementById('list-view');
+  const gridView = document.getElementById('grid-view');
+  const bgImage = document.getElementById('bg-image') as HTMLDivElement;
+
+  // Load saved preference
+  const savedView = localStorage.getItem('travels-view') || 'list';
+
+  function showView(view: string) {
+    if (view === 'list') {
+      listView!.style.display = 'block';
+      gridView!.style.display = 'none';
+      listViewBtn!.classList.add('active');
+      gridViewBtn!.classList.remove('active');
+      bgImage.style.display = 'block';
+    } else {
+      listView!.style.display = 'none';
+      gridView!.style.display = 'grid';
+      listViewBtn!.classList.remove('active');
+      gridViewBtn!.classList.add('active');
+      bgImage.style.display = 'none';
+      bgImage.style.backgroundImage = '';
+    }
+    localStorage.setItem('travels-view', view);
+  }
+
+  // Initialize view
+  showView(savedView);
+
+  listViewBtn?.addEventListener('click', () => showView('list'));
+  gridViewBtn?.addEventListener('click', () => showView('grid'));
+
+  // Carousel functionality
+  const carousels = new Map<number, { currentIndex: number; images: NodeListOf<HTMLImageElement>; dots: NodeListOf<HTMLButtonElement> }>();
+
+  // Initialize carousels
+  document.querySelectorAll('.carousel').forEach((carousel, carouselIndex) => {
+    const images = carousel.querySelectorAll('img') as NodeListOf<HTMLImageElement>;
+    const dots = carousel.querySelectorAll('.dot') as NodeListOf<HTMLButtonElement>;
+    carousels.set(carouselIndex, { currentIndex: 0, images, dots });
+  });
+
+  function showImage(carouselIndex: number, imageIndex: number) {
+    const carousel = carousels.get(carouselIndex);
+    if (!carousel) return;
+
+    carousel.images.forEach((img, i) => {
+      img.classList.toggle('active', i === imageIndex);
+    });
+
+    carousel.dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === imageIndex);
+    });
+
+    carousel.currentIndex = imageIndex;
+  }
+
+  // Carousel buttons
+  document.querySelectorAll('.carousel-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.currentTarget as HTMLButtonElement;
+      const carouselIndex = parseInt(target.dataset.carousel!);
+      const dir = target.dataset.dir;
+      const carousel = carousels.get(carouselIndex);
+      if (!carousel) return;
+
+      let newIndex = carousel.currentIndex;
+      if (dir === 'next') {
+        newIndex = (carousel.currentIndex + 1) % carousel.images.length;
+      } else {
+        newIndex = (carousel.currentIndex - 1 + carousel.images.length) % carousel.images.length;
+      }
+      showImage(carouselIndex, newIndex);
+    });
+  });
+
+  // Dot navigation
+  document.querySelectorAll('.dot').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      const target = e.currentTarget as HTMLButtonElement;
+      const carouselIndex = parseInt(target.dataset.carousel!);
+      const dotIndex = parseInt(target.dataset.dotIndex!);
+      showImage(carouselIndex, dotIndex);
+    });
+  });
+
+  // Background hover effect
+  document.querySelectorAll('.carousel img').forEach(img => {
+    img.addEventListener('mouseenter', (e) => {
+      const target = e.currentTarget as HTMLImageElement;
+      bgImage.style.backgroundImage = `url(${target.src})`;
+      bgImage.classList.add('active');
+    });
+
+    img.addEventListener('mouseleave', () => {
+      bgImage.classList.remove('active');
+    });
+  });
+</script>
+
 <style>
+  /* Background image */
+  .background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.5s ease, background-image 0.3s ease;
+  }
+
+  .background-image.active {
+    opacity: 1;
+  }
+
+  .background-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    backdrop-filter: blur(40px);
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .background-image::before {
+      background: rgba(0, 0, 0, 0.85);
+    }
+  }
+
+  /* Main layout */
   main {
     padding: 4rem 1rem;
+    position: relative;
+    z-index: 1;
   }
 
   .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+    gap: 2rem;
   }
 
   h1 {
@@ -97,10 +316,229 @@ function formatDateRange(startDate: Date, endDate?: Date) {
   .subtitle {
     font-size: 1.125rem;
     color: #6b7280;
-    margin-bottom: 3rem;
   }
 
-  .travels-grid {
+  /* View toggle */
+  .view-toggle {
+    display: flex;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.25rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .toggle-btn {
+    padding: 0.5rem;
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+  }
+
+  .toggle-btn:hover {
+    background: #f3f4f6;
+  }
+
+  .toggle-btn.active {
+    background: #2563eb;
+    color: white;
+  }
+
+  /* List View */
+  .list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 6rem;
+  }
+
+  .list-item {
+    position: relative;
+  }
+
+  .list-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .list-content.left .text-column {
+    order: 1;
+  }
+
+  .list-content.left .carousel-column {
+    order: 2;
+  }
+
+  .list-content.right .text-column {
+    order: 2;
+  }
+
+  .list-content.right .carousel-column {
+    order: 1;
+  }
+
+  .text-column h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.75rem;
+  }
+
+  .location {
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .date {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+
+  .description {
+    color: #374151;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .tag {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .read-more {
+    display: inline-block;
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+
+  .read-more:hover {
+    transform: translateX(4px);
+  }
+
+  /* Carousel */
+  .carousel {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    aspect-ratio: 3 / 2;
+    background: #f3f4f6;
+  }
+
+  .carousel-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .carousel-track img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.3s ease;
+    cursor: pointer;
+  }
+
+  .carousel-track img.active {
+    opacity: 1;
+    z-index: 1;
+  }
+
+  .carousel-track img:hover {
+    transform: scale(1.02);
+  }
+
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    color: #111827;
+    font-size: 2rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+  }
+
+  .carousel:hover .carousel-btn {
+    opacity: 1;
+  }
+
+  .carousel-btn:hover {
+    background: white;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .carousel-btn.prev {
+    left: 1rem;
+  }
+
+  .carousel-btn.next {
+    right: 1rem;
+  }
+
+  .carousel-dots {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 2;
+  }
+
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s;
+    padding: 0;
+  }
+
+  .dot.active {
+    background: white;
+    width: 1.5rem;
+    border-radius: 0.25rem;
+  }
+
+  /* Grid View */
+  .grid-view {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 2rem;
@@ -167,45 +605,25 @@ function formatDateRange(startDate: Date, endDate?: Date) {
     padding: 1.5rem;
   }
 
-  h2 {
+  .content h2 {
     font-size: 1.5rem;
     font-weight: 600;
     color: #111827;
     margin-bottom: 0.5rem;
   }
 
-  .location {
-    color: #2563eb;
-    font-weight: 500;
+  .content .location {
     font-size: 0.9rem;
-    margin-bottom: 0.25rem;
   }
 
-  .date {
-    color: #6b7280;
+  .content .date {
     font-size: 0.875rem;
     margin-bottom: 0.75rem;
   }
 
-  .description {
-    color: #374151;
-    line-height: 1.6;
+  .content .description {
+    font-size: 1rem;
     margin-bottom: 1rem;
-  }
-
-  .tags {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .tag {
-    background: #fef3c7;
-    color: #92400e;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
   }
 
   .empty-state {
@@ -215,14 +633,49 @@ function formatDateRange(startDate: Date, endDate?: Date) {
     padding: 4rem 1rem;
   }
 
-  @media (max-width: 768px) {
-    .travels-grid {
-      grid-template-columns: 1fr;
+  /* Mobile responsive */
+  @media (max-width: 968px) {
+    .list-content {
+      grid-template-columns: 1fr !important;
+      gap: 2rem;
+    }
+
+    .list-content.left .text-column,
+    .list-content.right .text-column {
+      order: 1 !important;
+    }
+
+    .list-content.left .carousel-column,
+    .list-content.right .carousel-column {
+      order: 2 !important;
+    }
+
+    .header {
+      flex-direction: column;
+    }
+
+    .list-view {
+      gap: 4rem;
     }
   }
 
-  @media (prefers-color-scheme: dark) {
+  @media (max-width: 768px) {
+    .grid-view {
+      grid-template-columns: 1fr;
+    }
+
     h1 {
+      font-size: 2rem;
+    }
+
+    .text-column h2 {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    h1, .text-column h2, .content h2 {
       color: #f9fafb;
     }
 
@@ -230,13 +683,13 @@ function formatDateRange(startDate: Date, endDate?: Date) {
       color: #9ca3af;
     }
 
-    .travel-card {
-      background: #161b22;
+    .view-toggle {
+      background: #1f2937;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
 
-    h2 {
-      color: #f9fafb;
+    .toggle-btn:hover {
+      background: #374151;
     }
 
     .location {
@@ -247,13 +700,31 @@ function formatDateRange(startDate: Date, endDate?: Date) {
       color: #9ca3af;
     }
 
-    .description {
+    .description, .content .description {
       color: #d1d5db;
     }
 
     .tag {
       background: #713f12;
       color: #fde68a;
+    }
+
+    .travel-card {
+      background: #161b22;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .carousel {
+      background: #1f2937;
+    }
+
+    .carousel-btn {
+      background: rgba(31, 41, 55, 0.9);
+      color: #f9fafb;
+    }
+
+    .carousel-btn:hover {
+      background: #1f2937;
     }
 
     .empty-state {
