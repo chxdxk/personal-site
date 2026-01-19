@@ -26,6 +26,8 @@ jobs:
 
       - name: Build Astro site
         working-directory: ./frontend
+        env:
+          PUBLIC_API_ENDPOINT: ${{ secrets.PUBLIC_API_ENDPOINT }}
         run: npm run build
 
       - name: Configure AWS credentials
@@ -38,7 +40,7 @@ jobs:
       - name: Sync to S3
         working-directory: ./frontend
         run: |
-          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }}/ --delete --cache-control max-age=31536000,public
+          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }}/ --cache-control max-age=31536000,public
 
       - name: Invalidate CloudFront cache
         run: |
