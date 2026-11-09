@@ -1,0 +1,205 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #07070c;
+  color: #f2f0ea;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The WebGL canvas fills the screen and stays put while the page scrolls over it */
+.webgl {
+  position: fixed !important;
+  inset: 0;
+}
+
+/* The HTML layer scrolls on top of the canvas.
+   pointer-events: none lets the mouse "fall through" the text to the canvas,
+   so the 3D scene still sees the cursor. */
+main {
+  position: relative;
+  pointer-events: none;
+}
+
+/* ---------- Sections: each one is (at least) a full screen ---------- */
+
+.section {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: clamp(1.5rem, 6vw, 5rem);
+}
+
+.section.right {
+  justify-content: flex-end;
+}
+
+.section.center {
+  justify-content: center;
+  align-items: flex-end;
+  text-align: center;
+}
+
+.copy {
+  max-width: 30rem;
+}
+
+.copy.wide {
+  max-width: 38rem;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  align-items: flex-end;
+}
+
+.eyebrow,
+.label {
+  font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+h1 {
+  font-size: clamp(3rem, 11vw, 9rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  margin: 0.2em 0 0.3em;
+}
+
+.tagline {
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  max-width: 32ch;
+  opacity: 0.75;
+}
+
+.hint,
+.scroll-cue {
+  position: absolute;
+  right: clamp(1.5rem, 6vw, 5rem);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.4;
+}
+
+.hint {
+  top: clamp(1.5rem, 6vw, 5rem);
+}
+
+.scroll-cue {
+  bottom: clamp(1.5rem, 6vw, 5rem);
+}
+
+/* Show the right hint for mouse vs. touch devices */
+.hint-touch {
+  display: none;
+}
+
+@media (hover: none) {
+  .hint-mouse {
+    display: none;
+  }
+  .hint-touch {
+    display: inline;
+  }
+}
+
+/* ---------- Content sections ---------- */
+
+h2 {
+  font-size: clamp(2.2rem, 5.5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin: 0.35em 0 0.5em;
+}
+
+.copy > p:not(.label) {
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.copy > p + p:not(.label) {
+  margin-top: 1em;
+}
+
+.toolkit {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem 2.5rem;
+}
+
+.toolkit h3 {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 0.6rem;
+}
+
+.toolkit ul,
+.places {
+  list-style: none;
+}
+
+.toolkit li {
+  font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+  line-height: 1.7;
+}
+
+.places li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(242, 240, 234, 0.18);
+}
+
+.places li:last-child {
+  border-bottom: 1px solid rgba(242, 240, 234, 0.18);
+}
+
+.place {
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  font-weight: 500;
+}
+
+.note {
+  font-size: 0.95rem;
+  opacity: 0.6;
+}
+
+/* ---------- Phones: blob up top, text at the bottom of each screen ---------- */
+
+@media (max-width: 700px) {
+  .section {
+    align-items: flex-end;
+    padding-bottom: 3rem;
+  }
+
+  .section.right {
+    justify-content: flex-start;
+  }
+
+  .section.center {
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .toolkit {
+    gap: 1.25rem 1.5rem;
+  }
+}
