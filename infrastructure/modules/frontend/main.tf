@@ -100,9 +100,17 @@ resource "aws_cloudfront_distribution" "website" {
     }
   }
 
-  # Custom error response for SPA routing
+  # Show our 404 page for missing files.
+  # S3 answers 403 (not 404) for a missing file, because CloudFront isn't allowed
+  # to list the bucket. So both codes are turned into a proper 404 page.
   custom_error_response {
     error_code         = 404
+    response_code      = 404
+    response_page_path = "/404.html"
+  }
+
+  custom_error_response {
+    error_code         = 403
     response_code      = 404
     response_page_path = "/404.html"
   }
