@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import Blob from './scene/Blob.jsx'
+import Effects from './scene/Effects.jsx'
 import { useSmoothScroll, reducedMotion } from './scroll.js'
 
 const toolkit = [
@@ -61,8 +62,12 @@ export default function App() {
 
   return (
     <>
-      <Canvas className="webgl" camera={{ position: [0, 0, 4], fov: 45 }} dpr={[1, 2]}>
+      {/* dpr = resolution multiplier on high-density screens. Capped at 1.5
+          instead of 2: post-processing runs on every pixel, and grain + bloom
+          hide the slightly lower resolution. 2 → 1.5 is ~44% fewer pixels. */}
+      <Canvas className="webgl" camera={{ position: [0, 0, 4], fov: 45 }} dpr={[1, 1.5]}>
         <Blob />
+        <Effects />
       </Canvas>
 
       <main ref={main}>

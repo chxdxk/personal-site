@@ -23,9 +23,12 @@ void main() {
   float diffuse = max(dot(normal, lightDir), 0.0);
   color *= 0.3 + diffuse * 0.9;
 
-  // 3. Fresnel rim: edges facing away from the camera glow
+  // 3. Fresnel rim: edges facing away from the camera glow.
+  // The 1.6 pushes the rim brighter than pure white ("HDR"). Screens can't show
+  // that, but the Bloom effect looks for exactly these over-bright pixels and
+  // turns them into a soft glow. Tone mapping then brings them back into range.
   float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
-  color += uRimColor * fresnel * 0.9;
+  color += uRimColor * fresnel * 1.6;
 
   gl_FragColor = vec4(color, 1.0);
 
