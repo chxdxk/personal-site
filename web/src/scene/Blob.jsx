@@ -2,19 +2,14 @@ import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { scroll, reducedMotion } from '../scroll.js'
-import { keyframes } from './keyframes.js'
+import { keyframes, sampleSection, blobState } from './keyframes.js'
 
 // Vite's "?raw" suffix imports a file as a plain string – exactly what
 // Three.js wants for shader source code.
 import vertexShader from './shaders/blob.vert.glsl?raw'
 import fragmentShader from './shaders/blob.frag.glsl?raw'
 
-const { lerp, damp, clamp } = THREE.MathUtils
-
-// Ease-in-out curve: slow at both ends, fast in the middle.
-// Applied to the progress between two sections so the blob "settles" into
-// each section's look instead of moving at a constant, robotic speed.
-const smoothstep = (t) => t * t * (3 - 2 * t)
+const { lerp, damp } = THREE.MathUtils
 
 export default function Blob() {
   const mesh = useRef()
@@ -63,11 +58,8 @@ export default function Blob() {
     const u = m.material.uniforms
 
     // ---- 1. Where are we on the page? ----------------------------------
-    // scroll.section is a decimal like 1.4 = "40% of the way from section 1 to 2".
-    // Split it into the two keyframes we're between (a, b) and how far along (t).
-    const s = clamp(scroll.section, 0, looks.length - 1)
-    const i = Math.min(Math.floor(s), looks.length - 2)
-    const t = smoothstep(s - i)
+    // Which two section looks are we between (a, b), and how far along (t)?
+    const { i, t, s } = sampleSection()
     const a = looks[i]
     const b = looks[i + 1]
 
@@ -83,6 +75,11 @@ export default function Blob() {
     m.position.x = damp(m.position.x, targetX, 5, delta)
     m.position.y = damp(m.position.y, targetY, 5, delta)
     m.scale.setScalar(damp(m.scale.x, targetScale, 5, delta))
+    m.visible = m.scale.x > 0.01 // don't draw (or hover-test) an invisible blob
+
+    // Tell the particle ring where we are
+    blobState.position.copy(m.position)
+    blobState.scale = m.scale.x
 
     u.uFrequency.value = lerp(a.frequency, b.frequency, t)
     u.uSpeed.value = lerp(a.speed, b.speed, t)
@@ -109,6 +106,7 @@ export default function Blob() {
   return (
     <mesh
       ref={mesh}
+      scale={0} // start hidden; useFrame grows it to the right size
       // R3F raycasts the mouse against meshes for you. e.point is where the
       // mouse ray hits the surface, in world space. We convert it to the mesh's
       // own (local) space so it lines up with the vertex positions in the shader.

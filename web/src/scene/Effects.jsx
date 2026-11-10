@@ -74,7 +74,7 @@ export default function Effects() {
       {/* 4. FILM GRAIN: subtle random noise that changes every frame.
              SCREEN blending only ever lightens, so the grain shows up even on
              the black background. */}
-      <Noise blendFunction={BlendFunction.SCREEN} opacity={0.07} />
+      <Noise blendFunction={BlendFunction.SCREEN} opacity={0.03} />
 
       {/* 5. VIGNETTE: darkens the corners to pull the eye to the middle. */}
       <Vignette offset={0.3} darkness={0.65} />

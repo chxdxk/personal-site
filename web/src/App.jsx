@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import Blob from './scene/Blob.jsx'
 import Effects from './scene/Effects.jsx'
+import Particles from './scene/Particles.jsx'
 import { useSmoothScroll, reducedMotion } from './scroll.js'
 
 const toolkit = [
@@ -66,7 +67,13 @@ export default function App() {
           instead of 2: post-processing runs on every pixel, and grain + bloom
           hide the slightly lower resolution. 2 → 1.5 is ~44% fewer pixels. */}
       <Canvas className="webgl" camera={{ position: [0, 0, 4], fov: 45 }} dpr={[1, 1.5]}>
+        {/* Solid scene background (same as the page). Without it the canvas is
+            transparent, and effects like grain only land where something was
+            drawn – which shows up as a visible box around faded edges. */}
+        <color attach="background" args={['#07070c']} />
+
         <Blob />
+        <Particles />
         <Effects />
       </Canvas>
 
